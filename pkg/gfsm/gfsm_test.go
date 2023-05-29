@@ -1,10 +1,10 @@
 package gfsm
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
 type StartStopSM int
@@ -16,50 +16,55 @@ const (
 )
 
 type StartState struct {
+	t *testing.T
 }
 
-func (s StartState) OnEnter(smCtx StateMachineContext) {
-	fmt.Println("StartState.OnEnter")
+func (s *StartState) OnEnter(smCtx StateMachineContext) {
+	s.t = smCtx.(*aContext).t
 }
 
-func (s StartState) OnExit(smCtx StateMachineContext) {
-	fmt.Println("StartState.OnExit")
+func (s *StartState) OnExit(smCtx StateMachineContext) {
 }
 
-func (s StartState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
-	fmt.Println("StartState.Execute")
+func (s *StartState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
+	assert.NotNil(s.t, eventCtx)
+	_, ok := eventCtx.(StartData)
+	assert.True(s.t, ok)
+
 	return InProgress
 }
 
 type StopState struct {
+	t *testing.T
 }
 
-func (s StopState) OnEnter(smCtx StateMachineContext) {
-	fmt.Println("StopState.OnEnter")
+func (s *StopState) OnEnter(smCtx StateMachineContext) {
+	s.t = smCtx.(*aContext).t
 }
 
-func (s StopState) OnExit(smCtx StateMachineContext) {
-	fmt.Println("StopState.OnExit")
+func (s *StopState) OnExit(smCtx StateMachineContext) {
 }
 
-func (s StopState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
-	fmt.Println("StopState.Execute")
+func (s *StopState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
 	return Start
 }
 
 type InProgressState struct {
+	t *testing.T
 }
 
-func (i InProgressState) OnEnter(smCtx StateMachineContext) {
-	fmt.Println("InProgressState.OnEnter")
+func (s *InProgressState) OnEnter(smCtx StateMachineContext) {
+	s.t = smCtx.(*aContext).t
 }
 
-func (i InProgressState) OnExit(smCtx StateMachineContext) {
-	fmt.Println("InProgressState.OnExit")
+func (s *InProgressState) OnExit(smCtx StateMachineContext) {
 }
 
-func (i InProgressState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
-	fmt.Println("InProgressState.Execute")
+func (s *InProgressState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
+	assert.NotNil(s.t, eventCtx)
+	_, ok := eventCtx.(InProgressData)
+	assert.True(s.t, ok)
+
 	return InProgress
 }
 
@@ -67,8 +72,15 @@ type StartData struct {
 	id uuid.UUID
 }
 
-func TestStateMachineManual(t *testing.T) {
-	sm := stateMachine[StartStopSM]{
+type InProgressData struct {
+}
+
+type aContext struct {
+	t *testing.T
+}
+
+func newSmManual(t *testing.T) StateMachineHandler[StartStopSM] {
+	return &stateMachine[StartStopSM]{
 		state: Start,
 		states: States[StartStopSM]{
 			Start: state[StartStopSM]{
@@ -91,58 +103,44 @@ func TestStateMachineManual(t *testing.T) {
 				},
 			},
 		},
-		smCtx: nil,
+		smCtx: &aContext{t: t},
 	}
-	sm.Start()
-	defer sm.Stop()
-	sm.ProcessEvent(StartData{id: uuid.New()})
 }
 
-func TestStateMachineBuilder(t *testing.T) {
-	sm := newBuilder[StartStopSM]().
+func newSmWithBuilder(t *testing.T) StateMachineHandler[StartStopSM] {
+	return newBuilder[StartStopSM]().
 		SetDefaultState(Start).
+		SetSmContext(&aContext{t: t}).
 		RegisterState(Start, &StartState{}, []StartStopSM{Stop, InProgress}).
 		RegisterState(Stop, &StopState{}, []StartStopSM{Stop}).
 		RegisterState(InProgress, &InProgressState{}, []StartStopSM{Stop}).
 		Build()
-
-	sm.Start()
-	defer sm.Stop()
-	sm.ProcessEvent(StartData{id: uuid.New()})
 }
 
-func BenchmarkSliceAccess(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		_ = sliceTest()
+func TestStateMachine(t *testing.T) {
+	var tests = []struct {
+		sm       StateMachineHandler[StartStopSM]
+		testName string
+	}{
+		{newSmManual(t), "manual SM creation"},
+		{newSmWithBuilder(t), "builder SM creation"},
 	}
-}
 
-func BenchmarkMapAccess(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		_ = mapTest()
-	}
-}
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			sm := test.sm
 
-func sliceTest() bool {
-	transitions := map[StartStopSM]struct{}{
-		Stop:       {},
-		Start:      {},
-		InProgress: {},
-	}
-	_, found := transitions[Stop]
-	return found
-}
+			sm.Start()
 
-func mapTest() bool {
-	transitions := []StartStopSM{
-		Start, Stop, InProgress,
+			assert.Equal(t, sm.State(), Start)
+			err := sm.ProcessEvent(StartData{id: uuid.New()})
+			assert.NoError(t, err)
+			assert.Equal(t, sm.State(), InProgress)
+			err = sm.ProcessEvent(InProgressData{})
+			assert.NoError(t, err)
+			assert.Equal(t, sm.State(), InProgress)
+
+			sm.Stop()
+		})
 	}
-	found := false
-	for _, transition := range transitions {
-		if Stop == transition {
-			found = true
-			break
-		}
-	}
-	return found
 }

@@ -18,12 +18,16 @@ type States[StateIdentifier comparable] map[StateIdentifier]state[StateIdentifie
 type StateMachineHandler[StateIdentifier comparable] interface {
 	Start()
 	Stop()
+
+	State() StateIdentifier
+
 	ProcessEvent(eventCtx EventContext) error
 }
 
 type StateMachineBuilder[StateIdentifier comparable] interface {
 	RegisterState(stateID StateIdentifier, action StateAction[StateIdentifier], transitions []StateIdentifier) StateMachineBuilder[StateIdentifier]
 	SetDefaultState(stateID StateIdentifier) StateMachineBuilder[StateIdentifier]
+	SetSmContext(ctx StateMachineContext) StateMachineBuilder[StateIdentifier]
 
 	Build() StateMachineHandler[StateIdentifier]
 }
@@ -51,6 +55,10 @@ func (s *stateMachine[StateIdentifier]) Start() {
 func (s *stateMachine[StateIdentifier]) Stop() {
 	state := s.states[s.state]
 	state.action.OnExit(s.smCtx)
+}
+
+func (s *stateMachine[StateIdentifier]) State() StateIdentifier {
+	return s.state
 }
 
 func (s *stateMachine[StateIdentifier]) ProcessEvent(eventCtx EventContext) error {

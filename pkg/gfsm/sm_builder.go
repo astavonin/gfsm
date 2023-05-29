@@ -42,3 +42,9 @@ func (s *stateMachineBuilder[StateIdentifier]) SetDefaultState(stateID StateIden
 
 	return s
 }
+
+func (s *stateMachineBuilder[StateIdentifier]) SetSmContext(ctx StateMachineContext) StateMachineBuilder[StateIdentifier] {
+	s.sm.smCtx = ctx
+
+	return s
+}
