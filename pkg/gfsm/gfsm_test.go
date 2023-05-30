@@ -108,7 +108,7 @@ func newSmManual(t *testing.T) StateMachineHandler[StartStopSM] {
 }
 
 func newSmWithBuilder(t *testing.T) StateMachineHandler[StartStopSM] {
-	return newBuilder[StartStopSM]().
+	return NewBuilder[StartStopSM]().
 		SetDefaultState(Start).
 		SetSmContext(&aContext{t: t}).
 		RegisterState(Start, &StartState{}, []StartStopSM{Stop, InProgress}).
@@ -143,4 +143,13 @@ func TestStateMachine(t *testing.T) {
 			sm.Stop()
 		})
 	}
+}
+
+func TestDoubleStateCreation(t *testing.T) {
+	builder := NewBuilder[StartStopSM]().
+		RegisterState(Stop, &StopState{}, []StartStopSM{Stop})
+
+	assert.Panics(t, func() {
+		builder.RegisterState(Stop, &StopState{}, []StartStopSM{Stop})
+	})
 }

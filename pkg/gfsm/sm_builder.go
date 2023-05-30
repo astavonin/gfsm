@@ -1,5 +1,7 @@
 package gfsm
 
+import "fmt"
+
 type stateMachineBuilder[StateIdentifier comparable] struct {
 	hasState        bool
 	hasDefaultState bool
@@ -18,6 +20,11 @@ func (s *stateMachineBuilder[StateIdentifier]) RegisterState(
 	stateID StateIdentifier,
 	action StateAction[StateIdentifier],
 	transitions []StateIdentifier) StateMachineBuilder[StateIdentifier] {
+
+	_, ok := s.sm.states[stateID]
+	if ok {
+		panic(fmt.Sprintf("state %v is already registered", stateID))
+	}
 
 	s.sm.states[stateID] = state[StateIdentifier]{
 		action:      action,

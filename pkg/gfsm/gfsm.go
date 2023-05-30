@@ -32,7 +32,7 @@ type StateMachineBuilder[StateIdentifier comparable] interface {
 	Build() StateMachineHandler[StateIdentifier]
 }
 
-func newBuilder[StateIdentifier comparable]() StateMachineBuilder[StateIdentifier] {
+func NewBuilder[StateIdentifier comparable]() StateMachineBuilder[StateIdentifier] {
 	return &stateMachineBuilder[StateIdentifier]{
 		hasState: false,
 		sm: &stateMachine[StateIdentifier]{
