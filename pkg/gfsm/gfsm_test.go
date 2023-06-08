@@ -23,10 +23,10 @@ func (s *StartState) OnEnter(smCtx StateMachineContext) {
 	s.t = smCtx.(*aContext).t
 }
 
-func (s *StartState) OnExit(smCtx StateMachineContext) {
+func (s *StartState) OnExit(_ StateMachineContext) {
 }
 
-func (s *StartState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
+func (s *StartState) Execute(_ StateMachineContext, eventCtx EventContext) StartStopSM {
 	assert.NotNil(s.t, eventCtx)
 	_, ok := eventCtx.(StartData)
 	assert.True(s.t, ok)
@@ -42,10 +42,10 @@ func (s *StopState) OnEnter(smCtx StateMachineContext) {
 	s.t = smCtx.(*aContext).t
 }
 
-func (s *StopState) OnExit(smCtx StateMachineContext) {
+func (s *StopState) OnExit(_ StateMachineContext) {
 }
 
-func (s *StopState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
+func (s *StopState) Execute(_ StateMachineContext, _ EventContext) StartStopSM {
 	return Start
 }
 
@@ -57,10 +57,10 @@ func (s *InProgressState) OnEnter(smCtx StateMachineContext) {
 	s.t = smCtx.(*aContext).t
 }
 
-func (s *InProgressState) OnExit(smCtx StateMachineContext) {
+func (s *InProgressState) OnExit(_ StateMachineContext) {
 }
 
-func (s *InProgressState) Execute(smCtx StateMachineContext, eventCtx EventContext) StartStopSM {
+func (s *InProgressState) Execute(_ StateMachineContext, eventCtx EventContext) StartStopSM {
 	assert.NotNil(s.t, eventCtx)
 	_, ok := eventCtx.(InProgressData)
 	assert.True(s.t, ok)
@@ -112,7 +112,7 @@ func newSmWithBuilder(t *testing.T) StateMachineHandler[StartStopSM] {
 		SetDefaultState(Start).
 		SetSmContext(&aContext{t: t}).
 		RegisterState(Start, &StartState{}, []StartStopSM{Stop, InProgress}).
-		RegisterState(Stop, &StopState{}, []StartStopSM{Stop}).
+		RegisterState(Stop, &StopState{}, []StartStopSM{Start}).
 		RegisterState(InProgress, &InProgressState{}, []StartStopSM{Stop}).
 		Build()
 }
