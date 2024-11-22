@@ -81,8 +81,8 @@ type aContext struct {
 
 func newSmManual(t *testing.T) StateMachineHandler[StartStopSM] {
 	return &stateMachine[StartStopSM]{
-		state: Start,
-		states: States[StartStopSM]{
+		currentStateID: Start,
+		states: StatesMap[StartStopSM]{
 			Start: state[StartStopSM]{
 				action: &StartState{},
 				transitions: Transitions[StartStopSM]{

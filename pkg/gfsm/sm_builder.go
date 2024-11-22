@@ -2,6 +2,35 @@ package gfsm
 
 import "fmt"
 
+// StateMachineBuilder interface provides access to a builder that simplifies state machine creation. Builder usage is optional,
+// and state machine object can be created manually if needed.
+// Refer to newSmManual test for manual state machine creation or newSmWithBuilder as the alternative approach with builder.
+type StateMachineBuilder[StateIdentifier comparable] interface {
+	// RegisterState call register one more state referenced by stateID with list of all valid transactions listed in transitions
+	// and handler (action) into the state machine.
+	RegisterState(stateID StateIdentifier, action StateAction[StateIdentifier], transitions []StateIdentifier) StateMachineBuilder[StateIdentifier]
+	// SetDefaultState tells which state is the default for the state machine. Each state machine must have a default state.
+	// On StateMachineHandler.Start() call, state machine will switch to the defined default state.
+	SetDefaultState(stateID StateIdentifier) StateMachineBuilder[StateIdentifier]
+	// SetSmContext is an optional call that allow to pass any context that is unique and persistent (but mutable) for each state machine.
+	SetSmContext(ctx StateMachineContext) StateMachineBuilder[StateIdentifier]
+
+	// Build is the final call that aggregates all the data from previous calls and creates new state machine.
+	Build() StateMachineHandler[StateIdentifier]
+}
+
+// NewBuilder function generates StateMachineBuilder which simplifies state machine creation process.
+func NewBuilder[StateIdentifier comparable]() StateMachineBuilder[StateIdentifier] {
+	return &stateMachineBuilder[StateIdentifier]{
+		hasState: false,
+		sm: &stateMachine[StateIdentifier]{
+			states: StatesMap[StateIdentifier]{},
+		},
+	}
+}
+
+// stateMachineBuilder[StateIdentifier comparable] is an implementation for
+// the StateMachineBuilder[StateIdentifier comparable] interface
 type stateMachineBuilder[StateIdentifier comparable] struct {
 	hasState        bool
 	hasDefaultState bool
@@ -44,7 +73,8 @@ func makeTransitions[StateIdentifier comparable](transitions []StateIdentifier) 
 }
 
 func (s *stateMachineBuilder[StateIdentifier]) SetDefaultState(stateID StateIdentifier) StateMachineBuilder[StateIdentifier] {
-	s.sm.state = stateID
+	s.sm.currentStateID = stateID
+	s.sm.defaultStateID = stateID
 	s.hasDefaultState = true
 
 	return s
