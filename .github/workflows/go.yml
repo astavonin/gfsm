@@ -10,24 +10,13 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Setup Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: 1.23.x
-
-    - name: Generate
-      run: |
-        go get golang.org/x/tools/cmd/stringer@latest
-        go install golang.org/x/tools/cmd/stringer@latest
-        go generate ./...
-
+    - name: prepare-env
+      uses: ./.github/env
     - name: Build
       run: go build -v ./...
-
     - name: Test
       run: go test -v ./...

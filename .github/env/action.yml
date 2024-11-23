@@ -1,0 +1,15 @@
+name: prepare-env
+
+runs:
+  using: composite
+  steps:
+  - name: Setup Go
+    uses: actions/setup-go@v5
+    with:
+      go-version: 1.23.x
+  - name: Generate
+    shell: bash
+    run: |
+      go get golang.org/x/tools/cmd/stringer@latest
+      go install golang.org/x/tools/cmd/stringer@latest
+      go generate ./...
