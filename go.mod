@@ -1,4 +1,4 @@
-module gfsm
+module github.com/astavonin/gfsm
 
 go 1.23
 

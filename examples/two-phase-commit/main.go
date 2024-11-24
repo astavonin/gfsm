@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"gfsm/pkg/gfsm"
+
+	gfsm2 "github.com/astavonin/gfsm"
 )
 
 //go:generate stringer -type=State
@@ -28,13 +29,13 @@ type commitRequest struct {
 	commitID string
 }
 
-func (s *initState) OnEnter(_ gfsm.StateMachineContext) {
+func (s *initState) OnEnter(_ gfsm2.StateMachineContext) {
 }
 
-func (s *initState) OnExit(_ gfsm.StateMachineContext) {
+func (s *initState) OnExit(_ gfsm2.StateMachineContext) {
 }
 
-func (s *initState) Execute(smCtx gfsm.StateMachineContext, eventCtx gfsm.EventContext) State {
+func (s *initState) Execute(smCtx gfsm2.StateMachineContext, eventCtx gfsm2.EventContext) State {
 	cCtx := smCtx.(*coordinatorContext)
 	req, ok := eventCtx.(commitRequest)
 	if !ok {
@@ -64,14 +65,14 @@ type commitVote struct {
 	commit bool
 }
 
-func (s *waitState) OnEnter(_ gfsm.StateMachineContext) {
+func (s *waitState) OnEnter(_ gfsm2.StateMachineContext) {
 	s.votesCnt = 0
 }
 
-func (s *waitState) OnExit(_ gfsm.StateMachineContext) {
+func (s *waitState) OnExit(_ gfsm2.StateMachineContext) {
 }
 
-func (s *waitState) Execute(smCtx gfsm.StateMachineContext, eventCtx gfsm.EventContext) State {
+func (s *waitState) Execute(smCtx gfsm2.StateMachineContext, eventCtx gfsm2.EventContext) State {
 	cCtx := smCtx.(*coordinatorContext)
 	vote, ok := eventCtx.(commitVote)
 	if !ok || !vote.commit {
@@ -98,22 +99,22 @@ type responseState struct {
 	keepResp State
 }
 
-func (s *responseState) OnEnter(smCtx gfsm.StateMachineContext) {
+func (s *responseState) OnEnter(smCtx gfsm2.StateMachineContext) {
 	cCtx := smCtx.(*coordinatorContext)
 	s.votesCnt = cCtx.partCnt
-	fmt.Printf("commiting %s\n", cCtx.commitID)
+	fmt.Printf("committing %s\n", cCtx.commitID)
 	//for i := 0; i < cCtx.votesCnt; i++ {
 	//	sending commit/abort message to each participant
 	//}
 }
 
-func (s *responseState) OnExit(_ gfsm.StateMachineContext) {
+func (s *responseState) OnExit(_ gfsm2.StateMachineContext) {
 }
 
-func (s *responseState) Execute(_ gfsm.StateMachineContext, eventCtx gfsm.EventContext) State {
+func (s *responseState) Execute(_ gfsm2.StateMachineContext, eventCtx gfsm2.EventContext) State {
 	resp, ok := eventCtx.(commitVote)
 	if !ok {
-		fmt.Printf("invalid responce\n")
+		fmt.Printf("invalid response\n")
 		// nothing to process, keeping state
 		return s.keepResp
 	}
@@ -132,7 +133,7 @@ func (s *responseState) Execute(_ gfsm.StateMachineContext, eventCtx gfsm.EventC
 }
 
 func main() {
-	sm := gfsm.NewBuilder[State]().
+	sm := gfsm2.NewBuilder[State]().
 		SetDefaultState(Init).
 		SetSmContext(&coordinatorContext{partCnt: 3}).
 		RegisterState(Init, &initState{}, []State{Wait}).

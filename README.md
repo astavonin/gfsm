@@ -1,6 +1,8 @@
 # GFSM - simple and fast Finite State Machine for Go
 
-![main](https://github.com/astavonin/gfsm/actions/workflows/go.yml/badge.svg) ![main](https://github.com/astavonin/gfsm/actions/workflows/staticcheck-action.yml/badge.svg?event=push)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/astavonin/gfsm)](https://pkg.go.dev/github.com/astavonin/gfsm)
+![build-and-test](https://github.com/astavonin/gfsm/actions/workflows/go.yml/badge.svg)
+![CI](https://github.com/astavonin/gfsm/actions/workflows/staticcheck-action.yml/badge.svg)
 
 The GFSM library provides a simple and **fast** implementation of a Finite State Machine (FSM) for Go. The library adopts C++-style approaches with a primary focus on speed and simplicity, which is the main difference from alternative Go FSM implementations like [looplab/fsm](https://github.com/looplab/fsm).
 
