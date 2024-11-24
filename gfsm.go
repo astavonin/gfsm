@@ -27,6 +27,7 @@ type StateMachineHandler[StateIdentifier comparable] interface {
 	// On Start call, state machine will switch to the defined default state, which must be specified during state
 	// machine creation using StateMachineBuilder.SetDefaultState(...) call
 	Start()
+
 	// Stop call shutdowns the state machine. Any further State or ProcessEvent are not permitted on stopped
 	// state machine.
 	Stop()
