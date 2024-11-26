@@ -153,3 +153,17 @@ func TestDoubleStateCreation(t *testing.T) {
 		builder.RegisterState(Stop, &StopState{}, []StartStopSM{Stop})
 	})
 }
+
+func TestResetStatMachine(t *testing.T) {
+	sm := newSmWithBuilder(t)
+
+	sm.Start()
+	err := sm.ProcessEvent(StartData{id: uuid.New()})
+	assert.NoError(t, err)
+	assert.Equal(t, sm.State(), InProgress)
+
+	sm.Reset()
+	assert.Equal(t, sm.State(), Start)
+
+	sm.Stop()
+}
