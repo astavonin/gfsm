@@ -1,0 +1,16 @@
+name: CI
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches: [ "main" ]
+
+jobs:
+  publish:
+    name: "pkg.go.dev publishing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Publishing new version
+        run: |
+          curl https://sum.golang.org/lookup/github.com/astavonin/gfsm@${{  github.ref_name }}
