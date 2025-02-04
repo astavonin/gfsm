@@ -132,8 +132,10 @@ func (s *responseState) Execute(_ gfsm2.StateMachineContext, eventCtx gfsm2.Even
 	return Init
 }
 
+//go:generate gfsm_uml -format=plantuml
 func main() {
 	sm := gfsm2.NewBuilder[State]().
+		SetSMName("TwoPhaseCommit").
 		SetDefaultState(Init).
 		SetSmContext(&coordinatorContext{partCnt: 3}).
 		RegisterState(Init, &initState{}, []State{Wait}).

@@ -4,7 +4,7 @@
 ![build-and-test](https://github.com/astavonin/gfsm/actions/workflows/go.yml/badge.svg)
 ![CI](https://github.com/astavonin/gfsm/actions/workflows/staticcheck-action.yml/badge.svg)
 
-The GFSM library provides a simple and **fast** implementation of a Finite State Machine (FSM) for Go. The library adopts C++-style approaches with a primary focus on speed and simplicity, which is the main difference from alternative Go FSM implementations like [looplab/fsm](https://github.com/looplab/fsm).
+The GFSM library provides a simple and **fast** implementation of a Finite State Machine (FSM) for Go. The library adopts C++-style approaches with a primary focus on speed and simplicity, which is the main difference from alternative Go FSM implementations like [looplab/fsm](https://github.com/looplab/fsm). You can also create a visual representation of an FSM using the [gfsm_uml](./GFSM_UML.md) generator.
 
 # How To use GFSM
 
@@ -109,3 +109,4 @@ func (s *initState) Execute(smCtx gfsm.StateMachineContext, eventCtx gfsm.EventC
 	return Wait
 }
 ```
+

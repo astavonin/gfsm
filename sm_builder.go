@@ -6,6 +6,8 @@ import "fmt"
 // and state machine object can be created manually if needed.
 // Refer to newSmManual test for manual state machine creation or newSmWithBuilder as the alternative approach with builder.
 type StateMachineBuilder[StateIdentifier comparable] interface {
+	// SetSMName provides optional name for the SM. Primary uses for debugging proposes in cases when an app has more than one state machine.
+	SetSMName(smName string) StateMachineBuilder[StateIdentifier]
 	// RegisterState call register one more state referenced by stateID with list of all valid transactions listed in transitions
 	// and handler (action) into the state machine.
 	RegisterState(stateID StateIdentifier, action StateAction[StateIdentifier], transitions []StateIdentifier) StateMachineBuilder[StateIdentifier]
@@ -82,6 +84,12 @@ func (s *stateMachineBuilder[StateIdentifier]) SetDefaultState(stateID StateIden
 
 func (s *stateMachineBuilder[StateIdentifier]) SetSmContext(ctx StateMachineContext) StateMachineBuilder[StateIdentifier] {
 	s.sm.smCtx = ctx
+
+	return s
+}
+
+func (s *stateMachineBuilder[StateIdentifier]) SetSMName(smName string) StateMachineBuilder[StateIdentifier] {
+	s.sm.name = smName
 
 	return s
 }

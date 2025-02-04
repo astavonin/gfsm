@@ -49,6 +49,7 @@ type stateMachine[StateIdentifier comparable] struct {
 	defaultStateID StateIdentifier
 	states         StatesMap[StateIdentifier]
 	smCtx          StateMachineContext
+	name           string
 }
 
 func (s *stateMachine[StateIdentifier]) Start() {

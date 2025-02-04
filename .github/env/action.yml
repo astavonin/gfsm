@@ -12,4 +12,6 @@ runs:
     run: |
       go get golang.org/x/tools/cmd/stringer@latest
       go install golang.org/x/tools/cmd/stringer@latest
+      go install github.com/astavonin/gfsm/cmd/gfsm_uml@latest
+      
       go generate ./...
